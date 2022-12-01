@@ -20,7 +20,7 @@ function_objects = lambda properties: {
     'maximumRegion': ArrayToValue(lambda x: custom_functions.area_averages_max(x, fragment_shape=(1/3, 1/3), threshold=0.25)),
     'fullFlashCountGeneral': ValueHistoriesToValue(lambda x, y: custom_functions.count_flashes(x, y, frame_rate=properties['frame_rate'])),
     'fullFlashCountRed': ValueHistoriesToValue(lambda x, y: custom_functions.count_flashes(x, y, frame_rate=properties['frame_rate'])),
-    'eitherThreshold': ValuesToValue(lambda x, y: x > 3 or y > 3)
+    # 'eitherThreshold': ValuesToValue(lambda x, y: x > 3 or y > 3)
 }
 
 # PROCESSING PIPELINE
@@ -45,7 +45,7 @@ processing_pipeline = [
     ('maximumRegion', 14),
     ('fullFlashCountGeneral', (15, 16), "General Flashes"),
     ('fullFlashCountRed', (17, 18), "Red Flashes"),
-    ('eitherThreshold', (19, 20), "Fail")
+    # ('eitherThreshold', (19, 20), "Fail")
 ]
 
 # GUIDELINE OBJECT CREATION

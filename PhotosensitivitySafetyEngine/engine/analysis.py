@@ -42,8 +42,8 @@ class GuidelineProcess:
         if show_analysis:
             value_register.plot()
             plt.show()
-        print(value_register.values)
-        return sum(value_register.get('Fail')) == 0, value_register.get('Fail')
+        # print(value_register.values)
+        return value_register.values
 
 
 class Display:
