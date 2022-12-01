@@ -1,6 +1,0 @@
-README.md
-setup.py
-PhotosensitivitySafety.egg-info/PKG-INFO
-PhotosensitivitySafety.egg-info/SOURCES.txt
-PhotosensitivitySafety.egg-info/dependency_links.txt
-PhotosensitivitySafety.egg-info/top_level.txt
