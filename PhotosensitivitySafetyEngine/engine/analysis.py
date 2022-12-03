@@ -14,11 +14,11 @@ class GuidelineProcess:
         if display is None:
             display = Display()
         capture = cv2.VideoCapture(path)
-        print("FPS OF THE VIDEO : ", int(capture.get(cv2.CAP_PROP_FPS)))
+        # print("FPS OF THE VIDEO : ", int(capture.get(cv2.CAP_PROP_FPS)))
         display.set_property('frame_rate', int(capture.get(cv2.CAP_PROP_FPS)))
         display.set_property('analysis_resolution',
                              tuple([int(x / speedup) for x in display.get_property('display_resolution')]))
-        print(tuple([int(x / speedup) for x in display.get_property('display_resolution')]))
+        # print(tuple([int(x / speedup) for x in display.get_property('display_resolution')]))
         objects_with_properties = self.objects(display.properties())
         value_register = Register()
         while True:
