@@ -10,7 +10,7 @@ class GuidelineProcess:
         self.objects = objects
         self.pipeline = pipeline
 
-    def analyse_file(self, path, display=None, speedup=5, show_live_chart=True, show_dsp=True, show_analysis=True):
+    def analyse_file(self, path, display=None, speedup=10, show_live_chart=True, show_dsp=True, show_analysis=True):
         if display is None:
             display = Display()
         capture = cv2.VideoCapture(path)
@@ -111,8 +111,8 @@ class Register:
         fig, axs = plt.subplots(len(self.values.keys()))
         titles = list(self.values.keys())
         for i in range(len(titles)):
-            axs[i].plot(np.arange(len(self.values[titles[i]])) / 30, self.values[titles[i]])
-            axs[i].fill_between(np.arange(len(self.values[titles[i]])) / 30, 0, self.values[titles[i]], alpha=.3)
+            axs[i].plot(np.arange(len(self.values[titles[i]])), self.values[titles[i]])
+            axs[i].fill_between(np.arange(len(self.values[titles[i]])), 0, self.values[titles[i]], alpha=.3)
             axs[i].set_title(titles[i])
 
         fig.canvas.manager.set_window_title('Analysis Results')
