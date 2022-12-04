@@ -25,7 +25,7 @@ THRESHOLD = 3
 normal_file = 'pokemon.mp4'
 test_file = "out.avi"
 start = time.time()
-result = w3c_guideline.analyse_file(test_file, show_live_chart=False, show_dsp=False, show_analysis=True)
+result = w3c_guideline.analyse_file(normal_file, show_live_chart=False, show_dsp=False, show_analysis=True)
 end = time.time()
 
 # TODO HSV çevrilip luminance kanalı ortalaması alınarak gidilecek
@@ -63,58 +63,64 @@ print(end - start)
 
 V_PATH = "./pokemon.mp4"
 capture = cv2.VideoCapture(V_PATH)
-w = int(capture.get(cv2.CAP_PROP_FRAME_WIDTH))
-h = int(capture.get(cv2.CAP_PROP_FRAME_HEIGHT))
+width = int(capture.get(cv2.CAP_PROP_FRAME_WIDTH))
+height = int(capture.get(cv2.CAP_PROP_FRAME_HEIGHT))
 
-print("CaptureWidth : ", w, "\n"
-                            "CaptureHeight : ", h)
+print("CaptureWidth : ", width, "\n"
+                                "CaptureHeight : ", height)
 
 frame_end = red_flashes[1][1]
 frame_start = red_flashes[1][0]
 frame_count = frame_end - frame_start
 capture.set(1, frame_start)
-video_slice = np.ones((frame_count, h, w, 3), dtype=np.uint8)
+video_slice_BGR = np.ones((frame_count, height, width, 3), dtype=np.uint8)
+video_slice_HSV = np.ones((frame_count, height, width, 3), dtype=np.uint8)
 
 for f in range(frame_count):
     check, frame = capture.read()
     if check:
-        video_slice[f] = frame
-        # print(frame[:, :, 2])
-        # cv2.imshow('Video', video_slice[f]), cv2.waitKey(1)
-        # time.sleep(0.01)
+        video_slice_HSV[f] = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
+        video_slice_BGR[f] = frame
 
-vs_original = video_slice.copy()
+vs_original = video_slice_BGR.copy()
 
-print(video_slice.shape)
 
-# for x in range(w):
-#     for y in range(h):
-#         red_values = video_slice[:, y, x, 2]
-#         #
-#         # _fft_freq = np.fft.fftfreq(len(red_values), d=1 / 30)
-#         # _fft = np.fft.fft(red_values)
-#         #
-#         # half_freq = _fft_freq[:len(red_values) // 2]
-#         # for i in range(len(half_freq)):
-#         #     if half_freq[i] > 3:  # cut off all frequencies higher than 0.005
-#         #         _fft[i] = 0.0
-#         #         _fft[len(red_values) // 2 + i] = 0.0
-#         #
-#         # video_slice[:, y, x, 2] = np.fft.ifft(_fft)
-#         video_slice[:, y, x, 2] = low_pass_filter(red_values,bandlimit = 0.0000002,sampling_rate=30)
+def average_correction(vid):
+    # FPS/6
+    up_speed = int(30 // 6)
+    for frm in range(0, frame_count, 2):
+        for w in range(width):
+            for h in range(height):
+                vid[frm:frm + up_speed, h, w] = np.average(vid[frm:frm + up_speed, h, w], axis=0)
+        print(frm)
 
-# FPS/6
-up_speed = int(30//6)
-for frame in range(0, frame_count, 2):
-    for x in range(w):
-        for y in range(h):
-            video_slice[frame:frame + up_speed, y, x] = np.average(video_slice[frame:frame + up_speed, y, x], axis=0)
-    print(frame)
 
-out = cv2.VideoWriter('out.avi', cv2.VideoWriter_fourcc('M', 'J', 'P', 'G'), 30, (w, h))
-normal_out = cv2.VideoWriter('out_normal.avi', cv2.VideoWriter_fourcc('M', 'J', 'P', 'G'), 30, (w, h))
+def average_correction_hsv(vid):
+    # FPS/4
+    up_speed = int(30 // 4)
+    for frm in range(0, frame_count, 2):
+        for w in range(width):
+            for h in range(height):
+                vid[frm:frm + up_speed, h, w, 2] = np.average(vid[frm:frm + up_speed, h, w, 2], axis=0)
+        print(frm)
+
+
+def hsv_to_bgr(hsv, bgr):
+    for (idx_HSV, idx_BGR) in zip(range(len(hsv)), range(len(bgr))):
+        print(idx_BGR, idx_HSV)
+        bgr[idx_BGR] = cv2.cvtColor(hsv[idx_HSV], cv2.COLOR_HSV2BGR)
+
+
+average_correction(video_slice_BGR)
+
+# ALGORITHM YASIR
+# average_correction_hsv(video_slice_HSV)
+# hsv_to_bgr(video_slice_HSV, video_slice_BGR)
+
+out = cv2.VideoWriter('out.avi', cv2.VideoWriter_fourcc('M', 'J', 'P', 'G'), 30, (width, height))
+normal_out = cv2.VideoWriter('out_normal.avi', cv2.VideoWriter_fourcc('M', 'J', 'P', 'G'), 30, (width, height))
 for frame in range(frame_count):
-    out.write(video_slice[frame])
+    out.write(video_slice_BGR[frame])
     normal_out.write(vs_original[frame])
     # cv2.imshow('Video', video_slice[frame]), cv2.waitKey(1)
     # cv2.imshow('Video2', vs_original[frame]), cv2.waitKey(1)
