@@ -7,10 +7,7 @@ def add_noise_flash(sequence):
     #generate sinwave with freq between 3-6 hz
     #only affect smaller rectangle
     #get fps as param
-<<<<<<< HEAD
     #add random phase to sin wave
-=======
->>>>>>> 0ab92c3723fe66d81404af2e1c37d48c2f32e2ec
     samples = np.linspace(0, 2 * np.pi * 3 * 24, len(sequence))
     sin_wave = 128 * np.sin(samples)
     noised_sequence = []
@@ -31,10 +28,7 @@ def main():
     input_folder, output_folder = sys.argv[1:3]
     files = os.listdir(input_folder)
     for file in files:
-<<<<<<< HEAD
         print("Processing video: ", file)
-=======
->>>>>>> 0ab92c3723fe66d81404af2e1c37d48c2f32e2ec
         capture = cv2.VideoCapture(f"{input_folder}/{file}")
         frame_count = int(capture.get(cv2.CAP_PROP_FRAME_COUNT))
         fps = int(capture.get(cv2.CAP_PROP_FPS))
@@ -51,20 +45,13 @@ def main():
         while start_frame < frame_count - noise_span:
             start_frame = random.randint(start_frame, frame_count - noise_span)
             end_frame = start_frame + int(noise_span)
-<<<<<<< HEAD
             print("adding noise between frames: ", start_frame, end_frame)
             print(start_frame/fps, end_frame/fps, " (in seconds)")
-=======
-            print(start_frame/fps, end_frame/fps)
->>>>>>> 0ab92c3723fe66d81404af2e1c37d48c2f32e2ec
             #add noise
             noised_sequence = add_noise_flash(video_frames[start_frame:end_frame])
             for i in range(end_frame - start_frame):
                 video_frames[start_frame + i] = noised_sequence[i]
-<<<<<<< HEAD
             start_frame = end_frame
-=======
->>>>>>> 0ab92c3723fe66d81404af2e1c37d48c2f32e2ec
 
         noised_video = cv2.VideoWriter(f'{output_folder}/noised_{file}.avi', cv2.VideoWriter_fourcc('M', 'J', 'P', 'G'),
                         fps, (video_width, video_height))
