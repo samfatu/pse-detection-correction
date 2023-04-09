@@ -1,9 +1,9 @@
 import time
-
+import numpy as np
+import matplotlib.pyplot as plt
 from PhotosensitivitySafetyEngine.guidelines.w3c import *
 
-THRESHOLD = 1
-
+THRESHOLD = 3
 
 class CustomVideo:
     def __init__(self, video_path):
@@ -56,7 +56,7 @@ class CustomVideo:
         return self.flashes
 
 
-def analysis(video_path, show_live_chart=False, show_dsp=False, show_analysis=True):
+def analysis(video_path, show_live_chart=False, show_dsp=False, show_analysis=False):
     print(f'Video analysis started...')
     analysis_start_time = time.time()
     analysis_result = w3c_guideline.analyse_file(video_path, show_live_chart=show_live_chart,
@@ -64,9 +64,8 @@ def analysis(video_path, show_live_chart=False, show_dsp=False, show_analysis=Tr
     print(f'\nAnalysis took {(time.time() - analysis_start_time):.3f} seconds.')
     return analysis_result
 
-
 def frame_intervals(result):
-    # print(result)
+    #print(result)
     is_general, is_red, is_both = False, False, False
     general_start, red_start, both_start = None, None, None
 
@@ -105,51 +104,15 @@ def frame_intervals(result):
     if is_general:
         flashes.append(('general', general_start, len(result["General Flashes"])))
     elif is_red:
-        flashes.append(('red', red_start, len(result["General Flashes"])))
-    elif is_both:
-        flashes.append(('both', both_start, len(result["General Flashes"])))
+        flashes.append(('red', red_start, len(result["Red Flashes"])))
 
     print("Frame Interval Results")
     print("Flashes", flashes)
 
     return flashes
 
-def average_brigthness_correction(video_sequence, FPS, frame_count, interval=12):
-    average_interval = int(FPS // interval)
-    corrected_sequence = video_sequence.copy()
-    for i in range(0, frame_count):
-        lower = i - average_interval if i - average_interval > 0 else 0
-        upper = i + average_interval if i + average_interval < frame_count else frame_count
-        corrected_sequence[i] = np.average(video_sequence[lower:upper], axis=0)
-        corrected_sequence[i] = cv2.convertScaleAbs(corrected_sequence[i], alpha=0.3, beta=0.3)
-    return corrected_sequence
 
-def brigthness_correction(video_sequence, FPS, frame_count, interval=2):
-    corrected_sequence = video_sequence.copy()
-    for i in range(0, frame_count):
-        corrected_sequence[i] = cv2.convertScaleAbs(corrected_sequence[i], alpha=0.25, beta=0.25)
-    return corrected_sequence
-
-def average_hsv_correction(video_sequence, FPS, frame_count, interval=2):
-    average_interval = int(FPS // interval)
-    corrected_sequence = video_sequence.copy()
-    for i in range(0, frame_count):
-        lower = i - average_interval if i - average_interval > 0 else 0
-        upper = i + average_interval if i + average_interval < frame_count else frame_count
-        corrected_sequence[i] = np.average(video_sequence[lower:upper], axis=0)
-        corrected_sequence[i] = cv2.cvtColor(corrected_sequence[i], cv2.COLOR_HSV2BGR)
-    return corrected_sequence
-
-
-def blur_correction(video_sequence, FPS, frame_count, interval=2):
-    corrected_sequence = video_sequence.copy()
-    for i in range(0, frame_count):
-        corrected_sequence[i] = cv2.GaussianBlur(corrected_sequence[i], (15, 15), 5)
-
-    return corrected_sequence
-
-
-def average_correction(video_sequence, FPS, frame_count, interval=2):
+def average_correction(video_sequence, FPS, frame_count, interval=15):
     average_interval = int(FPS // interval)
     corrected_sequence = video_sequence.copy()
     for i in range(0, frame_count):
@@ -158,87 +121,22 @@ def average_correction(video_sequence, FPS, frame_count, interval=2):
         corrected_sequence[i] = np.average(video_sequence[lower:upper], axis=0)
     return corrected_sequence
 
-
-def apply_average_correction_on_video(original_video, output_path):
+def apply_correction_on_video(original_video, output_path):
     print(f'Correction started...')
     corrected_sequences = []
 
     for frame_info in original_video.flashes:
-        print(frame_info)
         if frame_info[0] == 'general':
-            FPS, frame_count, original_sequence, BGR_sequence, HSV_sequence = original_video.read_video_sequence(
-                frame_info)
-            corrected_sequence = average_correction(BGR_sequence, FPS, frame_count)  # Change correction method
+            FPS, frame_count, original_sequence, BGR_sequence, HSV_sequence = original_video.read_video_sequence(frame_info)
+            corrected_sequence = average_correction(BGR_sequence, FPS, frame_count) # Change correction method
             corrected_sequences.append(corrected_sequence)
         else:
-            FPS, frame_count, original_sequence, BGR_sequence, HSV_sequence = original_video.read_video_sequence(
-                frame_info)
-            corrected_sequence = average_correction(BGR_sequence, FPS, frame_count)  # Change correction method
+            FPS, frame_count, original_sequence, BGR_sequence, HSV_sequence = original_video.read_video_sequence(frame_info)
+            corrected_sequence = average_correction(BGR_sequence, FPS, frame_count) # Change correction method
             corrected_sequences.append(corrected_sequence)
 
     write_corrected_sequences(original_video, corrected_sequences, output_path)
-
     print()
-
-
-def apply_average_brigthness_correction_on_video(original_video, output_path):
-    print(f'Correction started...')
-    corrected_sequences = []
-
-    for frame_info in original_video.flashes:
-        if frame_info[0] == 'general':
-            FPS, frame_count, original_sequence, BGR_sequence, HSV_sequence = original_video.read_video_sequence(
-                frame_info)
-            corrected_sequence = average_brigthness_correction(BGR_sequence, FPS, frame_count)  # Change correction method
-            corrected_sequences.append(corrected_sequence)
-        else:
-            FPS, frame_count, original_sequence, BGR_sequence, HSV_sequence = original_video.read_video_sequence(
-                frame_info)
-            corrected_sequence = average_brigthness_correction(BGR_sequence, FPS, frame_count)  # Change correction method
-            corrected_sequences.append(corrected_sequence)
-
-    write_corrected_sequences(original_video, corrected_sequences, output_path)
-
-    print()
-
-def apply_brigthness_correction_on_video(original_video, output_path):
-    print(f'Correction started...')
-    corrected_sequences = []
-
-    for frame_info in original_video.flashes:
-        if frame_info[0] == 'general':
-            FPS, frame_count, original_sequence, BGR_sequence, HSV_sequence = original_video.read_video_sequence(
-                frame_info)
-            corrected_sequence = brigthness_correction(BGR_sequence, FPS, frame_count)  # Change correction method
-            corrected_sequences.append(corrected_sequence)
-        else:
-            FPS, frame_count, original_sequence, BGR_sequence, HSV_sequence = original_video.read_video_sequence(
-                frame_info)
-            corrected_sequence = brigthness_correction(BGR_sequence, FPS, frame_count)  # Change correction method
-            corrected_sequences.append(corrected_sequence)
-
-    write_corrected_sequences(original_video, corrected_sequences, output_path)
-
-def apply_blur_correction_on_video(original_video, output_path):
-    print(f'Correction started...')
-    corrected_sequences = []
-
-    for frame_info in original_video.flashes:
-        if frame_info[0] == 'general':
-            FPS, frame_count, original_sequence, BGR_sequence, HSV_sequence = original_video.read_video_sequence(
-                frame_info)
-            corrected_sequence = blur_correction(BGR_sequence, FPS, frame_count)  # Change correction method
-            corrected_sequences.append(corrected_sequence)
-        else:
-            FPS, frame_count, original_sequence, BGR_sequence, HSV_sequence = original_video.read_video_sequence(
-                frame_info)
-            corrected_sequence = blur_correction(BGR_sequence, FPS, frame_count)  # Change correction method
-            corrected_sequences.append(corrected_sequence)
-
-    write_corrected_sequences(original_video, corrected_sequences, output_path)
-
-    print()
-
 
 def write_corrected_sequences(original_video, corrected_sequences, output_path):
     corrected = cv2.VideoWriter(output_path, cv2.VideoWriter_fourcc('M', 'J', 'P', 'G'), original_video.FPS,
@@ -252,18 +150,15 @@ def write_corrected_sequences(original_video, corrected_sequences, output_path):
         for frame in corrected_sequence:
             corrected.write(frame)
 
-        next_interval = (original_video.flashes[i][2], original_video.flashes[i + 1][1] if (i + 1) < len(
-            original_video.flashes) else original_video.frame_count)
+        next_interval = (original_video.flashes[i][2], original_video.flashes[i + 1][1] if (i + 1) < len(original_video.flashes) else original_video.frame_count)
         next_part = original_video.get_frame_interval(next_interval)
         for frame in next_part:
             corrected.write(frame)
 
     corrected.release()
 
-
 def compare(original_video, corrected_video):
     pass
-
 
 def write_video(original_video, corrected_video, FPS):
     frame_count, height, width, dim = corrected_video.shape
@@ -279,18 +174,48 @@ def write_video(original_video, corrected_video, FPS):
     corrected.release()
     original.release()
 
-
 if __name__ == "__main__":
-    original_video_path = 'ep2.mp4'
+    original_video_path = 'pokemon.mp4'
     sequence_corrected_video_path = "sequence_corrected_video.avi"
     sequence_video_path = "sequence_video.avi"
     corrected_video_path = "corrected_video.avi"
 
     original_video = CustomVideo(original_video_path)
     original_video.analyse_video()
-    now = time.time()
-    apply_brigthness_correction_on_video(original_video,
-                                         corrected_video_path)  # Generates corrected video on given path
-    print(f"It past {time.time() - now}")
-    corrected_video = CustomVideo(corrected_video_path)
-    corrected_video.analyse_video()
+
+    #apply_correction_on_video(original_video, corrected_video_path) # Generates corrected video on given path
+
+    #corrected_video = CustomVideo(corrected_video_path)
+    #corrected_video.analyse_video()
+
+
+def hsv_to_bgr(hsv, bgr):
+    for (idx_HSV, idx_BGR) in zip(range(len(hsv)), range(len(bgr))):
+        bgr[idx_BGR] = cv2.cvtColor(hsv[idx_HSV], cv2.COLOR_HSV2BGR)
+
+
+def low_pass_filter(adata: np.ndarray, bandlimit: int = 3, sampling_rate: int = 30) -> np.ndarray:
+    # translate bandlimit from Hz to dataindex according to sampling rate and data size
+    bandlimit_index = int(bandlimit * adata.size / sampling_rate)
+    fsig = np.fft.fft(adata)
+
+    for i in range(bandlimit_index + 1, len(fsig) - bandlimit_index):
+        fsig[i] = 0
+
+    adata_filtered = np.fft.ifft(fsig)
+
+    return np.real(adata_filtered)
+
+'''
+# def average_correction_hsv(vid):
+#     # FPS/4
+#     up_speed = 5
+#     for frm in range(0, frame_count, 3):
+#         for w in range(width):
+#             for h in range(height):
+#                 vid_vals = vid[frm:frm + up_speed, h, w]
+#                 # print(std_vals)
+#                 if (np.max(vid_vals, axis=0)) - (np.min(vid_vals, axis=0)) > 60:
+#                     out[frm:frm + up_speed, h, w] = np.average(out[frm:frm + up_speed, h, w], axis=0)
+#         print(frm)
+'''
