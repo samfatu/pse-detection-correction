@@ -2,3 +2,4 @@ PhotosensitivitySafetyEngine/engine/__pycache__/*
 .vscode
 dataset/
 output_folder/
+*.pyc
