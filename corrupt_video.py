@@ -33,9 +33,6 @@ def add_noise_red(sequence, fps):
         noised_sequence.append(frame)
     return noised_sequence
 
-def add_noise(capture, is_flash):
-    pass
-
 def main():
     input_folder, output_folder = sys.argv[1:3]
     files = os.listdir(input_folder)
