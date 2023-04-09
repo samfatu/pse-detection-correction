@@ -28,6 +28,8 @@ def main():
     input_folder, output_folder = sys.argv[1:3]
     files = os.listdir(input_folder)
     for file in files:
+        video_name = file.split(".")[0]
+        video_info_file = open(f"{output_folder}/{video_name}_info.txt", "w+")
         print("Processing video: ", file)
         capture = cv2.VideoCapture(f"{input_folder}/{file}")
         frame_count = int(capture.get(cv2.CAP_PROP_FRAME_COUNT))
@@ -41,11 +43,12 @@ def main():
         for _ in range(frame_count):
             check, frame = capture.read()
             video_frames.append(frame)
-
         while start_frame < frame_count - noise_span:
             start_frame = random.randint(start_frame, frame_count - noise_span)
             end_frame = start_frame + int(noise_span)
             print("adding noise between frames: ", start_frame, end_frame)
+            print(f"general:{start_frame}-{end_frame}", file=video_info_file)
+
             print(start_frame/fps, end_frame/fps, " (in seconds)")
             #add noise
             noised_sequence = add_noise_flash(video_frames[start_frame:end_frame])
@@ -53,13 +56,15 @@ def main():
                 video_frames[start_frame + i] = noised_sequence[i]
             start_frame = end_frame
 
-        noised_video = cv2.VideoWriter(f'{output_folder}/noised_{file}.avi', cv2.VideoWriter_fourcc('M', 'J', 'P', 'G'),
+        noised_video = cv2.VideoWriter(f'{output_folder}/{video_name}_noised.avi', cv2.VideoWriter_fourcc('M', 'J', 'P', 'G'),
                         fps, (video_width, video_height))
 
         for frame in range(frame_count):
             noised_video.write(video_frames[frame])
 
         noised_video.release()
+        video_info_file.close()
+
 
 if __name__ == "__main__":
     main()
