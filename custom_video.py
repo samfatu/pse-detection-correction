@@ -1,7 +1,9 @@
 import time
 from PhotosensitivitySafetyEngine.guidelines.w3c import *
 
-THRESHOLD = 1
+THRESHOLD = 3
+
+
 class CustomVideo:
     def __init__(self, video_path):
         self.video_path = video_path
@@ -52,68 +54,68 @@ class CustomVideo:
     def get_flashes(self):
         return self.flashes
 
-
     @property
     def flashing_frame_count(self):
         count = 0
-        for _,start,end in self.flashes:
-            count += end - start
+        if self.flashes:
+            for _, start, end in self.flashes:
+                count += end - start
         return count
 
     def analysis(self, video_path, show_live_chart=False, show_dsp=False, show_analysis=False):
-      print(f'Video analysis started...')
-      analysis_start_time = time.time()
-      analysis_result = w3c_guideline.analyse_file(video_path, show_live_chart=show_live_chart,
-                                                  show_dsp=show_dsp, show_analysis=show_analysis)
-      print(f'\nAnalysis took {(time.time() - analysis_start_time):.3f} seconds.')
-      return analysis_result
+        print(f'Video analysis started...')
+        analysis_start_time = time.time()
+        analysis_result = w3c_guideline.analyse_file(video_path, show_live_chart=show_live_chart,
+                                                     show_dsp=show_dsp, show_analysis=show_analysis)
+        print(f'\nAnalysis took {(time.time() - analysis_start_time):.3f} seconds.')
+        return analysis_result
 
     def frame_intervals(self, result):
-      if len(result.keys()) == 0:
-          print("video is oky")
-          return
+        if len(result.keys()) == 0:
+            print("video is oky")
+            return
 
-      is_general, is_red, is_both = False, False, False
-      general_start, red_start, both_start = None, None, None
+        is_general, is_red, is_both = False, False, False
+        general_start, red_start, both_start = None, None, None
 
-      flashes = []
-      for i, (general, red) in enumerate(zip(result["General Flashes"], result["Red Flashes"])):
-          #  RED  GENERAL
-          #   >3   <=3   ->> ONLY RED
-          #   >3    >3   ->> BOTH
-          #  <=3    >3   ->> ONLY GENERAL
-          #  <=3   <=3   ->> CORRECT
-          is_frame_both = general > THRESHOLD and red > THRESHOLD
-          is_frame_general = general > THRESHOLD and not is_frame_both
-          is_frame_red = red > THRESHOLD and not is_frame_both
+        flashes = []
+        for i, (general, red) in enumerate(zip(result["General Flashes"], result["Red Flashes"])):
+            #  RED  GENERAL
+            #   >3   <=3   ->> ONLY RED
+            #   >3    >3   ->> BOTH
+            #  <=3    >3   ->> ONLY GENERAL
+            #  <=3   <=3   ->> CORRECT
+            is_frame_both = general > THRESHOLD and red > THRESHOLD
+            is_frame_general = general > THRESHOLD and not is_frame_both
+            is_frame_red = red > THRESHOLD and not is_frame_both
 
-          if is_frame_both and not is_both:
-              is_both = True
-              both_start = i
-          elif not is_frame_both and is_both:
-              is_both = False
-              flashes.append(('both', both_start, i))
+            if is_frame_both and not is_both:
+                is_both = True
+                both_start = i
+            elif not is_frame_both and is_both:
+                is_both = False
+                flashes.append(('both', both_start, i))
 
-          if is_frame_general and not is_general:
-              is_general = True
-              general_start = i
-          elif not is_frame_general and is_general:
-              is_general = False
-              flashes.append(('general', general_start, i))
+            if is_frame_general and not is_general:
+                is_general = True
+                general_start = i
+            elif not is_frame_general and is_general:
+                is_general = False
+                flashes.append(('general', general_start, i))
 
-          if is_frame_red and not is_red:
-              is_red = True
-              red_start = i
-          elif not is_frame_red and is_red:
-              is_red = False
-              flashes.append(('red', red_start, i))
+            if is_frame_red and not is_red:
+                is_red = True
+                red_start = i
+            elif not is_frame_red and is_red:
+                is_red = False
+                flashes.append(('red', red_start, i))
 
-      if is_general:
-          flashes.append(('general', general_start, len(result["General Flashes"])))
-      elif is_red:
-          flashes.append(('red', red_start, len(result["Red Flashes"])))
+        if is_general:
+            flashes.append(('general', general_start, len(result["General Flashes"])))
+        elif is_red:
+            flashes.append(('red', red_start, len(result["Red Flashes"])))
 
-      print("Frame Interval Results")
-      print("Flashes", flashes)
+        print("Frame Interval Results")
+        print("Flashes", flashes)
 
-      return flashes
+        return flashes
