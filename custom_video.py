@@ -1,8 +1,7 @@
 import time
 from PhotosensitivitySafetyEngine.guidelines.w3c import *
 
-THRESHOLD = 3
-
+THRESHOLD = 1
 class CustomVideo:
     def __init__(self, video_path):
         self.video_path = video_path
@@ -52,6 +51,14 @@ class CustomVideo:
 
     def get_flashes(self):
         return self.flashes
+
+
+    @property
+    def flashing_frame_count(self):
+        count = 0
+        for _,start,end in self.flashes:
+            count += end - start
+        return count
 
     def analysis(self, video_path, show_live_chart=False, show_dsp=False, show_analysis=False):
       print(f'Video analysis started...')

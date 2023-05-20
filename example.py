@@ -4,10 +4,15 @@ from custom_video import CustomVideo
 from correction_engine import CorrectionEngine
 
 def compare(original_video, corrected_video):
-    pass
+    original_total_flash, corrected_total_flash = original_video.flashing_frame_count, corrected_video.flashing_frame_count
+    original_percentage = original_total_flash / original_video.frame_count
+    corrected_percentage = corrected_total_flash / original_video.frame_count
+    print(f'Original perc: {original_percentage * 100 :.2f}% Corrected Perc: {corrected_percentage * 100 :.2f}%')
+    print(f'Video is corrected by {((original_percentage - corrected_percentage) / original_percentage) * 100 :.2f}%')
+
 
 if __name__ == "__main__":
-    original_video_path = 'ep2.mp4'
+    original_video_path = './output_folder/pexels-i̇brahimacikgozart-15346791-1280x720-60fps_noised.avi'
     # sequence_corrected_video_path = "sequence_corrected_video.avi"
     # sequence_video_path = "sequence_video.avi"
     corrected_video_path = "corrected_video.avi"
@@ -22,6 +27,7 @@ if __name__ == "__main__":
     corrected_video = CustomVideo(corrected_video_path)
     corrected_video.analyse_video()
 
+    compare(original_video, corrected_video)
 
 # def hsv_to_bgr(hsv, bgr):
 #     for (idx_HSV, idx_BGR) in zip(range(len(hsv)), range(len(bgr))):
