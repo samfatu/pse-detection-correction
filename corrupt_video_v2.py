@@ -3,6 +3,7 @@ import cv2
 import numpy as np
 import matplotlib.pyplot as plt
 
+# TODO: Correection yapıldıktan sonra her flash sekansının başını düzeltmeyi kaçırıyor
 
 def add_noise_red(frames, fps):
     flash_freq = 8  # Yanıp sönme frekansı (saniyede bir defa)

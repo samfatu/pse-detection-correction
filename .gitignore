@@ -6,3 +6,12 @@ input_folder/
 *.pyc
 .DS_Store
 corrupt_folder/
+corrected_folder/
+.idea
+__pycache__
+corrected_video.avi
+PhotosensitivitySafetyEngine/engine/__pycache__/analysis.cpython-310.pyc
+PhotosensitivitySafetyEngine/guidelines/__pycache__/w3c.cpython-310.pyc
+PhotosensitivitySafetyEngine/libraries/__pycache__/common_functions.cpython-310.pyc
+PhotosensitivitySafetyEngine/libraries/__pycache__/custom_functions.cpython-310.pyc
+PhotosensitivitySafetyEngine/libraries/__pycache__/function_objects.cpython-310.pyc

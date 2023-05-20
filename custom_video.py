@@ -115,7 +115,7 @@ class CustomVideo:
         elif is_red:
             flashes.append(('red', red_start, len(result["Red Flashes"])))
 
-        print("Frame Interval Results")
-        print("Flashes", flashes)
+        #print("Frame Interval Results")
+        #print("Flashes", flashes)
 
         return flashes

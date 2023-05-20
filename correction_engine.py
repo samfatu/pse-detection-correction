@@ -50,7 +50,7 @@ class CorrectionEngine:
             (frame_info[0], sequence_start, sequence_end))
         corrected_sequence = BGR_sequence.copy()
         brightness_factor = self.calculate_brightness_factor(corrected_sequence)
-        print(brightness_factor)
+        #print(brightness_factor)
 
         for i in range(general_interval, frame_count):
             lower = max(i - general_interval, 0)
@@ -115,6 +115,7 @@ class CorrectionEngine:
         FPS, frame_count, original_sequence, BGR_sequence, HSV_sequence = self.video.read_video_sequence(
             (frame_info[0], sequence_start, sequence_end))
         corrected_sequence = BGR_sequence.copy()
+        brightness_factor = self.calculate_brightness_factor(corrected_sequence)
         red_factor = self.calculate_red_factor(corrected_sequence)
 
         for i in range(general_interval, frame_count):
@@ -122,6 +123,7 @@ class CorrectionEngine:
             upper = min(i + general_interval, frame_count)
             corrected_sequence[i] = np.average(BGR_sequence[lower:upper], axis=0)
             corrected_sequence[i, :, :, 2] = (corrected_sequence[i, :, :, 2] * red_factor).astype(np.uint8)
+            corrected_sequence[i] = self.adjust_brightness(corrected_sequence[i], brightness_factor)
 
         return corrected_sequence[general_interval:frame_count - general_interval]
 
@@ -150,7 +152,7 @@ class CorrectionEngine:
             algorithm = self.choose_algorithm(frame_info[0])
             corrected_sequence = algorithm(frame_info)  # Change correction method
             corrected_sequences.append(corrected_sequence)
-        # print('from apply_Correction', corrected_sequences)
+
         self.save(corrected_sequences)
         print()
 
