@@ -4,3 +4,4 @@ dataset/
 output_folder/
 input_folder/
 *.pyc
+.DS_Store
