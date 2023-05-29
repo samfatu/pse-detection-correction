@@ -41,8 +41,8 @@ class CorrectionEngine:
         return corrected_sequence[general_interval:frame_count - general_interval]
 
     def general_correction_v2(self, frame_info):
-        interval = 12
-        general_interval = int(self.video.FPS // interval)
+        interval = self.video.FPS // 2
+        general_interval = 2
         sequence_start = max(frame_info[1] - general_interval, 0)
         sequence_end = min(frame_info[2] + general_interval, self.video.frame_count)
 
@@ -107,8 +107,7 @@ class CorrectionEngine:
         return corrected_sequence
 
     def both_correction(self, frame_info):
-        interval = 12
-        general_interval = int(self.video.FPS // interval)
+        general_interval = 2
         sequence_start = max(frame_info[1] - general_interval, 0)
         sequence_end = min(frame_info[2] + general_interval, self.video.frame_count)
 

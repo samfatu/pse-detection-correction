@@ -18,10 +18,11 @@ def join_videos_side_by_side(video1_path, video2_path, output_path):
     video1.close()
     video2.close()
 
+number = 1
 # Provide the file paths and output path
-video1_path = "./input_folder/pokemon.mp4"
-video2_path = "./corrected_folder/okemon_corrected.avi"
-output_path = "./concatenated/pokemon.mp4"
+video1_path = f"./input_folder/{number}.mp4"
+video2_path = f"./corrected_folder/{number}.avi"
+output_path = f"./concatenated/{number}.mp4"
 
 # Call the function to join videos side by side and save the result
 join_videos_side_by_side(video1_path, video2_path, output_path)
