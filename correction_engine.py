@@ -50,14 +50,13 @@ class CorrectionEngine:
             (frame_info[0], sequence_start, sequence_end))
         corrected_sequence = BGR_sequence.copy()
         brightness_factor = self.calculate_brightness_factor(corrected_sequence)
-        #print(brightness_factor)
-
+        # print(len(BGR_sequence[general_interval:frame_count - general_interval]))
         for i in range(general_interval, frame_count):
             lower = max(i - general_interval, 0)
             upper = min(i + general_interval, frame_count)
             corrected_sequence[i] = np.average(BGR_sequence[lower:upper], axis=0)
             corrected_sequence[i] = self.adjust_brightness(corrected_sequence[i], brightness_factor)
-
+        # print(len(corrected_sequence[general_interval:frame_count - general_interval]))
         return corrected_sequence[general_interval:frame_count - general_interval]
 
     def adjust_brightness(self, frame, brightness_factor):
@@ -152,11 +151,17 @@ class CorrectionEngine:
             corrected_sequence = algorithm(frame_info)  # Change correction method
             corrected_sequences.append(corrected_sequence)
 
+        # count = 0
+        # for i in corrected_sequences:
+        #     print(len(i))
+        #     count += len(i)
+        # print(count)
         self.save(corrected_sequences)
-        print()
 
     def save(self, corrected_sequences):
-        corrected = cv2.VideoWriter(self.output_path, cv2.VideoWriter_fourcc('M', 'J', 'P', 'G'), self.video.FPS,
+        # corrected = cv2.VideoWriter(self.output_path, cv2.VideoWriter_fourcc(*'mp4v'), self.video.FPS,
+        #                             (self.video.video_width, self.video.video_height))
+        corrected = cv2.VideoWriter(self.output_path, cv2.VideoWriter_fourcc('m', 'p', '4', 'v'), self.video.FPS,
                                     (self.video.video_width, self.video.video_height))
         first_part = self.video.get_frame_interval((0, self.video.flashes[0][1]))
         for frame in first_part:
