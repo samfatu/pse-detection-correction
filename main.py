@@ -1,53 +1,67 @@
-import os
-import numpy as np
-import matplotlib.pyplot as plt
-from custom_video import CustomVideo
-from correction_engine import CorrectionEngine
-from concatenate_videos import join_videos_side_by_side
+import sys
+from comparation_engine import *
 
-def compare(original_video, corrected_video):
-    original_total_flash, corrected_total_flash = original_video.flashing_frame_count, corrected_video.flashing_frame_count
-    original_percentage = original_total_flash / original_video.frame_count
-    corrected_percentage = corrected_total_flash / original_video.frame_count
-    if original_percentage:
-        print(f'Original perc: {original_percentage * 100 :.2f}% Corrected Perc: {corrected_percentage * 100 :.2f}%')
-        print(f'Video is corrected by {((original_percentage - corrected_percentage) / original_percentage) * 100 :.2f}%')
-    else:
-        print(f'Video is not corrupted already')
+if len(sys.argv) != 4:
+    print("--> Help")
+    print("--> -f folder_path output_path")
+    print("corrects all videos in a folder and creates corrected videos in output_path")
+    print("--> -v video_path output_path")
+    print("corrects video and creates corrected video in output_path")
+    print("--> -fa folder_path output_path")
+    print("corrects all videos in a folder and creates corrected videos in output_path also creates photo for analyses")
+    print("--> -v video_path output_path")
+    print("corrects video and creates corrected video in output_path also creates photo for analyses")
+    sys.exit(0)
 
-
-def analyse_folder(path='./input_folder'):
-    files = [f for f in os.listdir(path) if not f.startswith('.')]
-
-    for file in files:
-        corrected_video_path = f"./corrected_folder/{file.strip('.mp4')}.avi"
-        print(f"{path}/{file}")
-        original_video = CustomVideo(f"{path}/{file}")
-        original_video.analyse_video()
-
-        correction_engine = CorrectionEngine(video=original_video, output_path=corrected_video_path)
-        correction_engine.apply_correction()
-        # apply_correction_on_video(original_video, corrected_video_path) # Generates corrected video on given path
-
-        corrected_video = CustomVideo(corrected_video_path)
-        corrected_video.analyse_video()
-
-        compare(original_video, corrected_video)
-        join_videos_side_by_side(f"{path}/{file}",corrected_video_path, f"./concatenated2/{file.strip('.mp4')}.mp4")
-
-
-if __name__ == "__main__":
-    # original_video_path = './input_folder/1.mp4'
-    # corrected_video_path = "./corrected_folder/1.avi"
-
-    # original_video = CustomVideo(original_video_path)
-    # original_video.analyse_video()
-
-    # correction_engine = CorrectionEngine(video=original_video, output_path=corrected_video_path)
-    # correction_engine.apply_correction()
-
-    # corrected_video = CustomVideo(corrected_video_path)
-    # corrected_video.analyse_video()
-
-    # compare(original_video, corrected_video)
-    analyse_folder()
+if sys.argv[1] == '-f':
+    folder_path = sys.argv[2]
+    if not os.path.exists(folder_path):
+        print("The folder does not exists !")
+        sys.exit(0)
+    output_path = sys.argv[3]
+    if not os.path.exists(output_path):
+        # Dosya yolu yoksa, o dosya yolunu oluşturur
+        os.makedirs(output_path)
+        print(f"'{output_path}' created!")
+    analyse_folder(folder_path, output_path)
+elif sys.argv[1] == '-v':
+    video_path = sys.argv[2]
+    if not os.path.exists(video_path):
+        print("The file does not exists !")
+        sys.exit(0)
+    output_path = sys.argv[3]
+    if not os.path.exists(output_path):
+        os.makedirs(output_path)
+    analyse_video(video_path, output_path)
+elif sys.argv[1] == '-fa':
+    folder_path = sys.argv[2]
+    if not os.path.exists(folder_path):
+        print("The folder does not exists !")
+        sys.exit(0)
+    output_path = sys.argv[3]
+    if not os.path.exists(output_path):
+        # Dosya yolu yoksa, o dosya yolunu oluşturur
+        os.makedirs(output_path)
+        print(f"'{output_path}' created!")
+    analyse_folder(folder_path, output_path,True)
+elif sys.argv[1] == '-va':
+    video_path = sys.argv[2]
+    if not os.path.exists(video_path):
+        print("The file does not exists !")
+        sys.exit(0)
+    output_path = sys.argv[3]
+    if not os.path.exists(output_path):
+        os.makedirs(output_path)
+    analyse_video(video_path, output_path, True)
+else:
+    print("--> Help")
+    print("--> -f folder_path output_path")
+    print("corrects all videos in a folder and creates corrected videos in output_path")
+    print("--> -v video_path output_path")
+    print("corrects video and creates corrected video in output_path")
+    print("--> -fa folder_path output_path")
+    print("corrects all videos in a folder and creates corrected videos in output_path also creates photo for analyses")
+    print("--> -va video_path output_path")
+    print("corrects video and creates corrected video in output_path also creates photo for analyses")
+    sys.exit(0)
+sys.exit(0)

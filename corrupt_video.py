@@ -3,7 +3,7 @@ import cv2
 import numpy as np
 import matplotlib.pyplot as plt
 
-def add_noise_flash(sequence, fps):
+def add_noise_flash_sin(sequence, fps):
     #only affect smaller rectangle
     freq = random.randint(3, 6)
     amplitude = random.randint(80, 128)
@@ -18,7 +18,7 @@ def add_noise_flash(sequence, fps):
         noised_sequence.append(frame)
     return noised_sequence
 
-def add_noise_red(sequence, fps):
+def add_noise_red_sin(sequence, fps):
     #only affect smaller rectangle
     freq = random.randint(3, 6)
     amplitude = random.randint(80, 128)
@@ -32,6 +32,31 @@ def add_noise_red(sequence, fps):
         frame = frame.astype(np.uint8)
         noised_sequence.append(frame)
     return noised_sequence
+
+
+def add_noise_red_rd(frames, fps, flash_freq=8, channel_multiplexer=0.5):
+    flash_frame_interval = int(fps / flash_freq)  # Yanıp sönme aralığı
+    noised_frames = []
+    for i in range(len(frames)):
+        frame = frames[i]
+        if i % flash_frame_interval == 0:
+            # Kırmızı flash için, B ve G kanallarını azalt
+            frame[:, :, 0] = frame[:, :, 0] * channel_multiplexer  # B
+            frame[:, :, 1] = frame[:, :, 1] * channel_multiplexer  # G
+        noised_frames.append(frame)
+    return noised_frames
+
+
+def add_noise_flash_rd(frames, fps, flash_freq=10, channel_increase=50.0):
+    flash_frame_interval = int(fps / flash_freq)
+    noised_frames = []
+    for i in range(len(frames)):
+        frame = frames[i]
+        if i % flash_frame_interval == 0:
+            frame = cv2.add(frame, np.array([channel_increase]))
+        noised_frames.append(frame)
+    return noised_frames
+
 
 def main():
     input_folder, output_folder = sys.argv[1:3]
@@ -59,12 +84,12 @@ def main():
                 print("adding red flashes between frames: ", start_frame, end_frame)
                 print(start_frame/fps, end_frame/fps, " (in seconds)")
                 print(f"red:{start_frame}-{end_frame}", file=video_info_file)
-                noised_sequence = add_noise_red(video_frames[start_frame:end_frame], fps)
+                noised_sequence = add_noise_red_sin(video_frames[start_frame:end_frame], fps)
             else:
                 print("adding general flashes between frames: ", start_frame, end_frame)
                 print(start_frame/fps, end_frame/fps, " (in seconds)")
                 print(f"general:{start_frame}-{end_frame}", file=video_info_file)
-                noised_sequence = add_noise_flash(video_frames[start_frame:end_frame], fps)
+                noised_sequence = add_noise_flash_sin(video_frames[start_frame:end_frame], fps)
             for i in range(end_frame - start_frame):
                 video_frames[start_frame + i] = noised_sequence[i]
             start_frame = end_frame

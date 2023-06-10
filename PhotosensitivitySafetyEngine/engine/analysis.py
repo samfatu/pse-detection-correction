@@ -10,7 +10,8 @@ class GuidelineProcess:
         self.objects = objects
         self.pipeline = pipeline
 
-    def analyse_file(self, path, display=None, speedup=10, show_live_chart=True, show_dsp=True, show_analysis=True):
+    def analyse_file(self, path, display=None, speedup=10, show_live_chart=True,
+                     show_dsp=True, show_analysis=True, save_analysis_result = None):
         if display is None:
             display = Display()
         capture = cv2.VideoCapture(path)
@@ -42,6 +43,9 @@ class GuidelineProcess:
         if show_analysis:
             value_register.plot()
             plt.show()
+        if save_analysis_result is not None:
+            value_register.plot()
+            plt.savefig(save_analysis_result)
         # print(value_register.values)
         return value_register.values
 
@@ -105,7 +109,7 @@ class Register:
     def get(self, name):
         return self.values[name]
 
-    def plot(self):
+    def plot(self,threshold = 3):
         plt.ioff()
         plt.close('all')
         fig, axs = plt.subplots(len(self.values.keys()))
@@ -114,6 +118,7 @@ class Register:
             axs[i].plot(np.arange(len(self.values[titles[i]])), self.values[titles[i]])
             axs[i].fill_between(np.arange(len(self.values[titles[i]])), 0, self.values[titles[i]], alpha=.3)
             axs[i].set_title(titles[i])
+            axs[i].axhline(y=threshold, color='r', linestyle='--')
 
         fig.canvas.manager.set_window_title('Analysis Results')
         fig.tight_layout()

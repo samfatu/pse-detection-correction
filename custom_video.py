@@ -12,12 +12,13 @@ class CustomVideo:
         self.video_height = int(self.capture.get(cv2.CAP_PROP_FRAME_HEIGHT))
         self.frame_count = int(self.capture.get(cv2.CAP_PROP_FRAME_COUNT))
         self.FPS = int(self.capture.get(cv2.CAP_PROP_FPS))
+        self.codec = int(self.capture.get(cv2.CAP_PROP_FOURCC))
 
         self.analysis_result = []
         self.flashes = []
 
-    def analyse_video(self):
-        self.analysis_result = self.analysis(self.video_path)
+    def analyse_video(self, save_path=None):
+        self.analysis_result = self.analysis(self.video_path, save_file=save_path)
         self.flashes = self.frame_intervals(self.analysis_result)
         print()
 
@@ -62,11 +63,11 @@ class CustomVideo:
                 count += end - start
         return count
 
-    def analysis(self, video_path, show_live_chart=False, show_dsp=False, show_analysis=False):
+    def analysis(self, video_path, show_live_chart=False, show_dsp=False, show_analysis=False, save_file=None):
         print(f'Video analysis started...')
         analysis_start_time = time.time()
-        analysis_result = w3c_guideline.analyse_file(video_path, show_live_chart=show_live_chart,
-                                                     show_dsp=show_dsp, show_analysis=show_analysis)
+        analysis_result = w3c_guideline.analyse_file(video_path, show_live_chart=show_live_chart, show_dsp=show_dsp,
+                                                     show_analysis=show_analysis, save_analysis_result=save_file)
         print(f'\nAnalysis took {(time.time() - analysis_start_time):.3f} seconds.')
         return analysis_result
 
@@ -115,7 +116,7 @@ class CustomVideo:
         elif is_red:
             flashes.append(('red', red_start, len(result["Red Flashes"])))
 
-        #print("Frame Interval Results")
-        #print("Flashes", flashes)
+        # print("Frame Interval Results")
+        # print("Flashes", flashes)
 
         return flashes
